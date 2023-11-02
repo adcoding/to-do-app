@@ -1,26 +1,39 @@
 'use client'
-import React , { useState } from 'react'
+import React , { useState , useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleXmark, faTimes } from '@fortawesome/free-solid-svg-icons';
+import { faCircleXmark } from '@fortawesome/free-solid-svg-icons';
+
 
 
 export default function Home() {
 
-  const [tasks, setTasks] = useState([])
+  // Load 'tasks' from local storage or initialize as an empty array
+  const storedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+  const [tasks, setTasks] = useState(storedTasks)
   const [task, setTask] = useState('')
 
   const addTask = () => {
     if (task.trim() !== '') {
-      setTasks([...tasks, task])
+      const newTasks = [...tasks, task];
+      setTasks(newTasks);
       setTask('')
+      // Update local storage with the new tasks array
+      localStorage.setItem('tasks', JSON.stringify(newTasks));
     }
   }
 
   const deleteTask = (index) => {
-    const updateTasks = [...tasks]
-    updateTasks.splice(index, 1)
-    setTasks(updateTasks)
+    const newTasks = [...tasks];
+    newTasks.splice(index, 1);
+    setTasks(newTasks);
+    // Update local storage with the updated tasks array
+    localStorage.setItem('tasks', JSON.stringify(newTasks));
   }
+
+  useEffect(() => {
+    // Update local storage whenever tasks change
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+  }, [tasks]);
 
   return (
     <main className='main'>
@@ -31,13 +44,15 @@ export default function Home() {
           <ul>
             {tasks.map((task, index) => (
               <li key={index}>
-                {task}
+                <input type="checkbox" id={`task-${index}`} />
+                <label htmlFor={`task-${index}`}>{task}</label>
                 <button onClick={() => deleteTask(index)}>
-                  <FontAwesomeIcon icon={faCircleXmark} size="lg" style={{color: "#8a8a89"}} />
+                  <FontAwesomeIcon icon={faCircleXmark} size="lg" style={{ color: "#8a8a89" }} />
                 </button>
               </li>
             ))}
           </ul>
+
 
           <input
           type='text'
@@ -52,8 +67,6 @@ export default function Home() {
         </div>
         
 
-        
-        
       </div>
     </main>
   ) 
